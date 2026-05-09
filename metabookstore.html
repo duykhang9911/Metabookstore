@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MetaBookstore – Thế Giới Sách Của Bạn</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:    #1a1f5e;
+    --indigo:  #3b3fa0;
+    --violet:  #6c5ce7;
+    --lavender:#a29bfe;
+    --sky:     #74b9ff;
+    --ice:     #dfe6fd;
+    --white:   #ffffff;
+    --glass:   rgba(255,255,255,0.12);
+    --glass2:  rgba(255,255,255,0.22);
+    --text-dark: #12164a;
+    --text-mid:  #3d4494;
+    --text-light:#8e9ad8;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #f0f4ff;
+    color: var(--text-dark);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── ANIMATED BG ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 10% 20%, rgba(108,92,231,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 90% 80%, rgba(116,185,255,0.22) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 50% 50%, rgba(162,155,254,0.12) 0%, transparent 70%),
+      linear-gradient(160deg, #e8eeff 0%, #f5f0ff 40%, #e0f0ff 100%);
+    z-index: -1;
+    animation: bgShift 12s ease-in-out infinite alternate;
+  }
+  @keyframes bgShift {
+    0%   { opacity: 1; }
+    100% { opacity: 0.8; filter: hue-rotate(12deg); }
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255,255,255,0.65);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid rgba(108,92,231,0.15);
+    padding: 0 5%;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 68px;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.55rem; font-weight: 700;
+    color: var(--navy);
+    text-decoration: none;
+  }
+  .logo-icon {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--violet), var(--sky));
+    border-radius: 10px;
+    display: grid; place-items: center;
+    color: white; font-size: 1.1rem;
+  }
+  .nav-links { display: flex; gap: 32px; list-style: none; }
+  .nav-links a {
+    font-size: 0.93rem; font-weight: 500; letter-spacing: 0.02em;
+    color: var(--text-mid); text-decoration: none;
+    position: relative; padding-bottom: 2px;
+    transition: color 0.25s;
+  }
+  .nav-links a::after {
+    content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
+    height: 2px; background: linear-gradient(90deg, var(--violet), var(--sky));
+    border-radius: 2px; transform: scaleX(0); transition: transform 0.25s;
+  }
+  .nav-links a:hover { color: var(--violet); }
+  .nav-links a:hover::after { transform: scaleX(1); }
+  .nav-cta {
+    background: linear-gradient(135deg, var(--violet), var(--indigo));
+    color: white; border: none; padding: 10px 22px;
+    border-radius: 50px; font-weight: 600; font-size: 0.9rem;
+    cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+  }
+  .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(108,92,231,0.4); }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 100px 5% 80px;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 60px; align-items: center; max-width: 1200px; margin: 0 auto;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.25);
+    padding: 6px 16px; border-radius: 50px; margin-bottom: 20px;
+    font-size: 0.83rem; font-weight: 600; color: var(--violet);
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .badge-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--violet); animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    line-height: 1.15; color: var(--navy);
+    margin-bottom: 20px;
+  }
+  h1 span { color: var(--violet); font-style: italic; }
+  .hero p {
+    font-size: 1.08rem; color: var(--text-mid);
+    line-height: 1.8; max-width: 500px; margin-bottom: 36px;
+  }
+  .hero-btns { display: flex; gap: 16px; flex-wrap: wrap; }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--violet), var(--indigo));
+    color: white; border: none; padding: 14px 32px;
+    border-radius: 50px; font-weight: 600; font-size: 1rem;
+    cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+    text-decoration: none; display: inline-block;
+  }
+  .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(108,92,231,0.42); }
+  .btn-outline {
+    background: transparent;
+    color: var(--violet); border: 1.5px solid var(--violet);
+    padding: 13px 28px; border-radius: 50px;
+    font-weight: 600; font-size: 1rem; cursor: pointer;
+    transition: all 0.2s; text-decoration: none; display: inline-block;
+  }
+  .btn-outline:hover { background: var(--violet); color: white; }
+
+  /* hero book stack */
+  .hero-visual {
+    position: relative; height: 420px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .book-stack { position: relative; width: 280px; height: 360px; }
+  .book {
+    position: absolute;
+    border-radius: 4px 10px 10px 4px;
+    display: flex; flex-direction: column; justify-content: flex-end; padding: 18px 16px;
+    font-family: 'Playfair Display', serif;
+    transition: transform 0.35s ease;
+    cursor: pointer;
+  }
+  .book:hover { transform: translateY(-8px) rotate(-2deg) !important; }
+  .book-1 {
+    width: 180px; height: 240px; left: 60px; top: 40px;
+    background: linear-gradient(160deg, #6c5ce7, #3b3fa0);
+    box-shadow: 6px 10px 40px rgba(59,63,160,0.4);
+    transform: rotate(-4deg);
+    z-index: 3;
+  }
+  .book-2 {
+    width: 170px; height: 220px; left: 80px; top: 80px;
+    background: linear-gradient(160deg, #74b9ff, #0984e3);
+    box-shadow: 6px 10px 40px rgba(9,132,227,0.35);
+    transform: rotate(5deg);
+    z-index: 2;
+  }
+  .book-3 {
+    width: 160px; height: 200px; left: 50px; top: 120px;
+    background: linear-gradient(160deg, #a29bfe, #6c5ce7);
+    box-shadow: 6px 10px 40px rgba(162,155,254,0.4);
+    transform: rotate(-8deg);
+    z-index: 1;
+  }
+  .book-title { color: rgba(255,255,255,0.9); font-size: 0.85rem; font-style: italic; }
+  .book-spine {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 12px;
+    background: rgba(0,0,0,0.18); border-radius: 4px 0 0 4px;
+  }
+  .floating-tag {
+    position: absolute; background: white;
+    border-radius: 14px; padding: 8px 14px;
+    box-shadow: 0 8px 32px rgba(108,92,231,0.2);
+    font-size: 0.78rem; font-weight: 600; color: var(--indigo);
+    display: flex; align-items: center; gap: 6px;
+    animation: floatUpDown 3s ease-in-out infinite;
+  }
+  .tag-1 { top: 10px; right: 10px; animation-delay: 0s; }
+  .tag-2 { bottom: 20px; right: 0; animation-delay: 1.2s; }
+  .tag-3 { bottom: 80px; left: 0; animation-delay: 0.7s; }
+  @keyframes floatUpDown {
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(-8px);}
+  }
+  .tag-icon { font-size: 1rem; }
+
+  /* ── STATS ── */
+  .stats-bar {
+    background: linear-gradient(135deg, var(--indigo), var(--violet));
+    padding: 32px 5%; margin: 0;
+  }
+  .stats-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px;
+  }
+  .stat { text-align: center; color: white; }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 700; }
+  .stat-label { font-size: 0.85rem; opacity: 0.8; margin-top: 4px; }
+
+  /* ── SECTION TITLES ── */
+  .section { padding: 80px 5%; max-width: 1260px; margin: 0 auto; }
+  .section-header { text-align: center; margin-bottom: 48px; }
+  .section-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    color: var(--navy); margin-bottom: 12px;
+  }
+  .section-header p { color: var(--text-mid); font-size: 1.02rem; max-width: 520px; margin: 0 auto; }
+  .section-tag {
+    display: inline-block; background: var(--ice); color: var(--indigo);
+    font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; padding: 4px 14px; border-radius: 50px; margin-bottom: 12px;
+  }
+
+  /* ── BOOK CARDS ── */
+  .books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 28px;
+  }
+  .book-card {
+    background: white; border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(59,63,160,0.07);
+    overflow: hidden; transition: transform 0.28s, box-shadow 0.28s;
+    cursor: pointer; border: 1px solid rgba(162,155,254,0.18);
+  }
+  .book-card:hover { transform: translateY(-8px); box-shadow: 0 16px 48px rgba(108,92,231,0.18); }
+  .book-cover {
+    height: 200px; display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem; font-style: italic; color: white;
+    text-align: center; padding: 20px; position: relative;
+    overflow: hidden;
+  }
+  .book-cover::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.12);
+  }
+  .book-cover span { position: relative; z-index: 1; }
+  .bc1 { background: linear-gradient(145deg,#6c5ce7,#a29bfe); }
+  .bc2 { background: linear-gradient(145deg,#0984e3,#74b9ff); }
+  .bc3 { background: linear-gradient(145deg,#6c5ce7,#74b9ff); }
+  .bc4 { background: linear-gradient(145deg,#3b3fa0,#6c5ce7); }
+  .bc5 { background: linear-gradient(145deg,#a29bfe,#dfe6fd); color: var(--indigo); }
+  .bc6 { background: linear-gradient(145deg,#0984e3,#6c5ce7); }
+  .book-info { padding: 16px 18px 18px; }
+  .book-cat {
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--violet); margin-bottom: 6px;
+  }
+  .book-name { font-weight: 600; font-size: 0.97rem; color: var(--navy); margin-bottom: 4px; line-height: 1.4; }
+  .book-author { font-size: 0.83rem; color: var(--text-light); margin-bottom: 10px; }
+  .book-row { display: flex; align-items: center; justify-content: space-between; }
+  .book-price { font-weight: 700; color: var(--violet); font-size: 1.05rem; }
+  .add-btn {
+    background: linear-gradient(135deg, var(--violet), var(--indigo));
+    color: white; border: none; width: 32px; height: 32px;
+    border-radius: 50%; font-size: 1.2rem; cursor: pointer;
+    display: grid; place-items: center; transition: transform 0.2s;
+  }
+  .add-btn:hover { transform: scale(1.15); }
+  .stars { color: #f39c12; font-size: 0.78rem; margin-bottom: 6px; }
+
+  /* ── CATEGORIES ── */
+  .cats-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px;
+  }
+  .cat-card {
+    border-radius: 16px; padding: 28px 20px; text-align: center;
+    cursor: pointer; transition: transform 0.25s, box-shadow 0.25s;
+    position: relative; overflow: hidden;
+  }
+  .cat-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: rgba(255,255,255,0.1);
+    opacity: 0; transition: opacity 0.25s;
+  }
+  .cat-card:hover { transform: translateY(-6px); box-shadow: 0 16px 48px rgba(59,63,160,0.2); }
+  .cat-card:hover::before { opacity: 1; }
+  .cat-icon { font-size: 2rem; margin-bottom: 10px; }
+  .cat-name { font-weight: 600; color: white; font-size: 0.95rem; margin-bottom: 4px; }
+  .cat-count { font-size: 0.78rem; color: rgba(255,255,255,0.75); }
+  .cc1 { background: linear-gradient(145deg,#6c5ce7,#a29bfe); }
+  .cc2 { background: linear-gradient(145deg,#0984e3,#74b9ff); }
+  .cc3 { background: linear-gradient(145deg,#3b3fa0,#6c5ce7); }
+  .cc4 { background: linear-gradient(145deg,#a29bfe,#6c5ce7); }
+  .cc5 { background: linear-gradient(145deg,#74b9ff,#a29bfe); }
+  .cc6 { background: linear-gradient(145deg,#6c5ce7,#0984e3); }
+
+  /* ── TESTIMONIALS ── */
+  .reviews-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+  .review-card {
+    background: white; border-radius: 18px; padding: 26px;
+    box-shadow: 0 4px 24px rgba(59,63,160,0.07);
+    border: 1px solid rgba(162,155,254,0.18);
+  }
+  .review-quote { font-size: 2.5rem; color: var(--lavender); line-height: 1; margin-bottom: 12px; }
+  .review-text { color: var(--text-mid); font-size: 0.95rem; line-height: 1.7; margin-bottom: 18px; }
+  .reviewer { display: flex; align-items: center; gap: 12px; }
+  .avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--violet), var(--sky));
+    display: grid; place-items: center;
+    font-weight: 700; color: white; font-size: 0.9rem;
+  }
+  .reviewer-name { font-weight: 600; color: var(--navy); font-size: 0.9rem; }
+  .reviewer-role { font-size: 0.78rem; color: var(--text-light); }
+
+  /* ── ABOUT ── */
+  .about-section {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--indigo) 60%, var(--violet) 100%);
+    padding: 80px 5%; color: white;
+  }
+  .about-inner {
+    max-width: 1000px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+  }
+  .about-badge {
+    display: inline-block; background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25); border-radius: 50px;
+    padding: 5px 16px; font-size: 0.78rem; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 16px; color: var(--lavender);
+  }
+  .about-inner h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 3vw, 2.4rem); margin-bottom: 16px;
+  }
+  .about-inner p { font-size: 0.97rem; line-height: 1.8; opacity: 0.85; margin-bottom: 12px; }
+  .about-card {
+    background: var(--glass2); border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.25);
+    padding: 32px; backdrop-filter: blur(10px);
+  }
+  .info-row { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 18px; }
+  .info-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 2px; }
+  .info-label { font-size: 0.75rem; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
+  .info-value { font-weight: 600; font-size: 1.02rem; }
+
+  /* ── NEWSLETTER ── */
+  .newsletter {
+    padding: 60px 5%; text-align: center;
+    background: linear-gradient(135deg, rgba(108,92,231,0.07), rgba(116,185,255,0.07));
+    border-top: 1px solid rgba(162,155,254,0.2);
+    border-bottom: 1px solid rgba(162,155,254,0.2);
+  }
+  .newsletter h2 { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--navy); margin-bottom: 10px; }
+  .newsletter p { color: var(--text-mid); margin-bottom: 28px; }
+  .newsletter-form { display: flex; gap: 12px; max-width: 460px; margin: 0 auto; }
+  .newsletter-form input {
+    flex: 1; padding: 14px 20px; border-radius: 50px;
+    border: 1.5px solid rgba(108,92,231,0.25);
+    font-size: 0.95rem; outline: none; font-family: 'DM Sans', sans-serif;
+    background: white; color: var(--navy);
+    transition: border-color 0.2s;
+  }
+  .newsletter-form input:focus { border-color: var(--violet); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--navy); color: white; padding: 48px 5% 28px;
+  }
+  .footer-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px;
+    padding-bottom: 36px; border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 24px;
+  }
+  footer h4 { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 16px; color: var(--lavender); }
+  footer p { font-size: 0.88rem; line-height: 1.7; opacity: 0.65; }
+  footer ul { list-style: none; }
+  footer li { margin-bottom: 10px; }
+  footer a { text-decoration: none; font-size: 0.88rem; color: rgba(255,255,255,0.65); transition: color 0.2s; }
+  footer a:hover { color: var(--lavender); }
+  .footer-bottom { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+  .footer-bottom p { font-size: 0.82rem; opacity: 0.5; }
+  .social-links { display: flex; gap: 12px; }
+  .social-btn {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+    display: grid; place-items: center; text-decoration: none;
+    font-size: 0.85rem; color: white; transition: background 0.2s;
+  }
+  .social-btn:hover { background: var(--violet); }
+
+  /* ── SEARCH BAR ── */
+  .search-wrap {
+    max-width: 640px; margin: 0 auto 60px; position: relative;
+  }
+  .search-wrap input {
+    width: 100%; padding: 16px 24px 16px 52px;
+    border-radius: 50px; border: 1.5px solid rgba(108,92,231,0.2);
+    font-size: 0.97rem; outline: none; font-family: 'DM Sans', sans-serif;
+    background: white; color: var(--navy);
+    box-shadow: 0 4px 24px rgba(108,92,231,0.08);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .search-wrap input:focus { border-color: var(--violet); box-shadow: 0 4px 24px rgba(108,92,231,0.2); }
+  .search-icon {
+    position: absolute; left: 20px; top: 50%; transform: translateY(-50%);
+    color: var(--text-light); font-size: 1.1rem;
+  }
+
+  /* ── CART TOAST ── */
+  .toast {
+    position: fixed; bottom: 30px; right: 30px;
+    background: linear-gradient(135deg, var(--violet), var(--indigo));
+    color: white; padding: 14px 24px; border-radius: 16px;
+    font-weight: 600; font-size: 0.9rem;
+    box-shadow: 0 8px 32px rgba(108,92,231,0.4);
+    transform: translateY(80px); opacity: 0;
+    transition: transform 0.35s, opacity 0.35s;
+    z-index: 999;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  @media(max-width: 900px) {
+    .hero { grid-template-columns: 1fr; text-align: center; padding: 60px 5%; }
+    .hero-visual { height: 280px; }
+    .book-stack { transform: scale(0.8); }
+    .about-inner { grid-template-columns: 1fr; }
+    .footer-inner { grid-template-columns: 1fr 1fr; }
+    .nav-links { display: none; }
+  }
+  @media(max-width: 600px) {
+    .footer-inner { grid-template-columns: 1fr; }
+    .newsletter-form { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="#">
+    <div class="logo-icon">📚</div>
+    MetaBookstore
+  </a>
+  <ul class="nav-links">
+    <li><a href="#books">Sách Mới</a></li>
+    <li><a href="#categories">Danh Mục</a></li>
+    <li><a href="#reviews">Đánh Giá</a></li>
+    <li><a href="#about">Giới Thiệu</a></li>
+  </ul>
+  <a class="nav-cta" href="#books">🛒 Giỏ Hàng (0)</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div>
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      Thế Giới Sách Số #1 Việt Nam
+    </div>
+    <h1>Khám Phá <span>Tri Thức</span> Không Giới Hạn</h1>
+    <p>MetaBookstore – nơi hàng nghìn tựa sách chất lượng hội tụ. Từ văn học kinh điển đến công nghệ hiện đại, chúng tôi mang đến hành trình đọc sách tuyệt vời nhất cho bạn.</p>
+    <div class="hero-btns">
+      <a class="btn-primary" href="#books">Khám Phá Ngay</a>
+      <a class="btn-outline" href="#categories">Xem Danh Mục</a>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="book-stack">
+      <div class="book book-3 bc3">
+        <div class="book-spine"></div>
+        <span class="book-title">Deep Work</span>
+      </div>
+      <div class="book book-2">
+        <div class="book-spine"></div>
+        <span class="book-title">Atomic Habits</span>
+      </div>
+      <div class="book book-1">
+        <div class="book-spine"></div>
+        <span class="book-title">Tư Duy Nhanh &amp; Chậm</span>
+      </div>
+    </div>
+    <div class="floating-tag tag-1"><span class="tag-icon">⭐</span>4.9 / 5.0</div>
+    <div class="floating-tag tag-2"><span class="tag-icon">🚀</span>Giao Nhanh 2H</div>
+    <div class="floating-tag tag-3"><span class="tag-icon">📦</span>Miễn Phí Ship</div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat"><div class="stat-num">50,000+</div><div class="stat-label">Đầu Sách</div></div>
+    <div class="stat"><div class="stat-num">120K+</div><div class="stat-label">Khách Hàng</div></div>
+    <div class="stat"><div class="stat-num">98%</div><div class="stat-label">Hài Lòng</div></div>
+    <div class="stat"><div class="stat-num">200+</div><div class="stat-label">Nhà Xuất Bản</div></div>
+  </div>
+</div>
+
+<!-- BOOKS -->
+<div class="section" id="books">
+  <div class="section-header">
+    <span class="section-tag">📖 Nổi Bật Tuần Này</span>
+    <h2>Sách Bán Chạy Nhất</h2>
+    <p>Những tựa sách được độc giả yêu thích và đánh giá cao nhất tháng này</p>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" placeholder="Tìm kiếm tên sách, tác giả, thể loại..." oninput="filterBooks(this.value)" />
+  </div>
+  <div class="books-grid" id="booksGrid">
+    <div class="book-card" data-name="Nhà Giả Kim">
+      <div class="book-cover bc1"><span>Nhà Giả Kim</span></div>
+      <div class="book-info">
+        <div class="book-cat">Văn Học</div>
+        <div class="book-name">Nhà Giả Kim</div>
+        <div class="book-author">Paulo Coelho</div>
+        <div class="stars">★★★★★</div>
+        <div class="book-row">
+          <span class="book-price">89.000 ₫</span>
+          <button class="add-btn" onclick="addCart('Nhà Giả Kim')">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="book-card" data-name="Đắc Nhân Tâm">
+      <div class="book-cover bc2"><span>Đắc Nhân Tâm</span></div>
+      <div class="book-info">
+        <div class="book-cat">Kỹ Năng</div>
+        <div class="book-name">Đắc Nhân Tâm</div>
+        <div class="book-author">Dale Carnegie</div>
+        <div class="stars">★★★★★</div>
+        <div class="book-row">
+          <span class="book-price">76.000 ₫</span>
+          <button class="add-btn" onclick="addCart('Đắc Nhân Tâm')">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="book-card" data-name="Atomic Habits">
+      <div class="book-cover bc3"><span>Atomic Habits</span></div>
+      <div class="book-info">
+        <div class="book-cat">Phát Triển Bản Thân</div>
+        <div class="book-name">Atomic Habits</div>
+        <div class="book-author">James Clear</div>
+        <div class="stars">★★★★★</div>
+        <div class="book-row">
+          <span class="book-price">115.000 ₫</span>
+          <button class="add-btn" onclick="addCart('Atomic Habits')">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="book-card" data-name="Tư Duy Nhanh Và Chậm">
+      <div class="book-cover bc4"><span>Tư Duy Nhanh Và Chậm</span></div>
+      <div class="book-info">
+        <div class="book-cat">Tâm Lý Học</div>
+        <div class="book-name">Tư Duy Nhanh Và Chậm</div>
+        <div class="book-author">Daniel Kahneman</div>
+        <div class="stars">★★★★☆</div>
+        <div class="book-row">
+          <span class="book-price">145.000 ₫</span>
+          <button class="add-btn" onclick="addCart('Tư Duy Nhanh Và Chậm')">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="book-card" data-name="Sapiens">
+      <div class="book-cover bc5"><span>Sapiens: Lược Sử Loài Người</span></div>
+      <div class="book-info">
+        <div class="book-cat">Lịch Sử</div>
+        <div class="book-name">Sapiens</div>
+        <div class="book-author">Yuval Noah Harari</div>
+        <div class="stars">★★★★★</div>
+        <div class="book-row">
+          <span class="book-price">158.000 ₫</span>
+          <button class="add-btn" onclick="addCart('Sapiens')">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="book-card" data-name="Deep Work">
+      <div class="book-cover bc6"><span>Deep Work</span></div>
+      <div class="book-info">
+        <div class="book-cat">Năng Suất</div>
+        <div class="book-name">Deep Work</div>
+        <div class="book-author">Cal Newport</div>
+        <div class="stars">★★★★★</div>
+        <div class="book-row">
+          <span class="book-price">99.000 ₫</span>
+          <button class="add-btn" onclick="addCart('Deep Work')">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CATEGORIES -->
+<div class="section" id="categories">
+  <div class="section-header">
+    <span class="section-tag">📂 Danh Mục</span>
+    <h2>Khám Phá Theo Thể Loại</h2>
+    <p>Hàng chục danh mục phong phú, luôn có cuốn sách dành riêng cho bạn</p>
+  </div>
+  <div class="cats-grid">
+    <div class="cat-card cc1"><div class="cat-icon">📖</div><div class="cat-name">Văn Học</div><div class="cat-count">8,200 đầu sách</div></div>
+    <div class="cat-card cc2"><div class="cat-icon">💡</div><div class="cat-name">Kỹ Năng</div><div class="cat-count">5,100 đầu sách</div></div>
+    <div class="cat-card cc3"><div class="cat-icon">🔬</div><div class="cat-name">Khoa Học</div><div class="cat-count">4,300 đầu sách</div></div>
+    <div class="cat-card cc4"><div class="cat-icon">🏛️</div><div class="cat-name">Lịch Sử</div><div class="cat-count">3,800 đầu sách</div></div>
+    <div class="cat-card cc5"><div class="cat-icon">💻</div><div class="cat-name">Công Nghệ</div><div class="cat-count">6,500 đầu sách</div></div>
+    <div class="cat-card cc6"><div class="cat-icon">🧠</div><div class="cat-name">Tâm Lý</div><div class="cat-count">2,900 đầu sách</div></div>
+  </div>
+</div>
+
+<!-- REVIEWS -->
+<div class="section" id="reviews">
+  <div class="section-header">
+    <span class="section-tag">💬 Đánh Giá</span>
+    <h2>Độc Giả Nói Gì?</h2>
+    <p>Hàng nghìn phản hồi tích cực từ cộng đồng yêu sách trên khắp Việt Nam</p>
+  </div>
+  <div class="reviews-grid">
+    <div class="review-card">
+      <div class="review-quote">"</div>
+      <div class="review-text">MetaBookstore là nơi tôi tin tưởng mua sách nhất. Hàng chính hãng, giao nhanh và dịch vụ chăm sóc khách hàng rất tận tâm. Tôi đã mua hơn 50 cuốn tại đây!</div>
+      <div class="reviewer">
+        <div class="avatar">NL</div>
+        <div><div class="reviewer-name">Nguyễn Lan Anh</div><div class="reviewer-role">⭐⭐⭐⭐⭐ · Giáo viên</div></div>
+      </div>
+    </div>
+    <div class="review-card">
+      <div class="review-quote">"</div>
+      <div class="review-text">Giao diện web rất đẹp, tìm sách cực kỳ dễ. Đặc biệt là giá cả hợp lý, thường xuyên có ưu đãi. Mình rất hài lòng và sẽ giới thiệu cho bạn bè!</div>
+      <div class="reviewer">
+        <div class="avatar">TM</div>
+        <div><div class="reviewer-name">Trần Minh Khôi</div><div class="reviewer-role">⭐⭐⭐⭐⭐ · Sinh viên CNTT</div></div>
+      </div>
+    </div>
+    <div class="review-card">
+      <div class="review-quote">"</div>
+      <div class="review-text">Kho sách phong phú, từ kinh điển đến sách mới nhất. Tìm được nhiều cuốn hiếm mà chỗ khác không có. MetaBookstore xứng đáng là nhà sách số 1!</div>
+      <div class="reviewer">
+        <div class="avatar">PH</div>
+        <div><div class="reviewer-name">Phạm Hoàng Nam</div><div class="reviewer-role">⭐⭐⭐⭐⭐ · Kỹ sư phần mềm</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<div class="about-section" id="about">
+  <div class="about-inner">
+    <div>
+      <div class="about-badge">👤 Giới Thiệu</div>
+      <h2>Về Người Phát Triển</h2>
+      <p>MetaBookstore được xây dựng như một dự án học thuật ứng dụng công nghệ web hiện đại Next.js để mang lại trải nghiệm mua sách trực tuyến tốt nhất.</p>
+      <p>Đây là sản phẩm thể hiện khả năng áp dụng kiến thức lập trình web vào thực tế, với giao diện người dùng thân thiện và hiệu suất cao.</p>
+    </div>
+    <div class="about-card">
+      <div class="info-row">
+        <div class="info-icon">👨‍💻</div>
+        <div>
+          <div class="info-label">Họ và Tên</div>
+          <div class="info-value">Đoàn Tương Duy Khang</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon">🎓</div>
+        <div>
+          <div class="info-label">Mã Số Sinh Viên</div>
+          <div class="info-value">2111844</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon">🏫</div>
+        <div>
+          <div class="info-label">Lớp</div>
+          <div class="info-value">CTK45A</div>
+        </div>
+      </div>
+      <div class="info-row" style="margin-bottom:0">
+        <div class="info-icon">🛠️</div>
+        <div>
+          <div class="info-label">Công Nghệ Sử Dụng</div>
+          <div class="info-value">Next.js · Tailwind CSS · TypeScript</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NEWSLETTER -->
+<div class="newsletter">
+  <h2>Đăng Ký Nhận Ưu Đãi</h2>
+  <p>Nhận thông báo về sách mới và khuyến mãi hấp dẫn mỗi tuần</p>
+  <div class="newsletter-form">
+    <input type="email" placeholder="Email của bạn..." />
+    <button class="btn-primary" onclick="subscribe()">Đăng Ký</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <div class="logo-icon" style="background:linear-gradient(135deg,var(--violet),var(--sky));border-radius:8px;width:34px;height:34px;display:grid;place-items:center;font-size:1rem;">📚</div>
+        <span style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--lavender);">MetaBookstore</span>
+      </div>
+      <p>Nền tảng mua bán sách trực tuyến hàng đầu Việt Nam. Hơn 50,000 đầu sách, giao hàng toàn quốc, cam kết chính hãng 100%.</p>
+    </div>
+    <div>
+      <h4>Danh Mục</h4>
+      <ul>
+        <li><a href="#">Văn Học</a></li>
+        <li><a href="#">Kỹ Năng Sống</a></li>
+        <li><a href="#">Khoa Học</a></li>
+        <li><a href="#">Thiếu Nhi</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Hỗ Trợ</h4>
+      <ul>
+        <li><a href="#">Chính Sách Đổi Trả</a></li>
+        <li><a href="#">Theo Dõi Đơn Hàng</a></li>
+        <li><a href="#">FAQ</a></li>
+        <li><a href="#">Liên Hệ</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Về Chúng Tôi</h4>
+      <ul>
+        <li><a href="#about">Giới Thiệu</a></li>
+        <li><a href="#">Blog Đọc Sách</a></li>
+        <li><a href="#">Tuyển Dụng</a></li>
+        <li><a href="#">Điều Khoản</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 MetaBookstore · Đoàn Tương Duy Khang · MSSV: 2111844 · Lớp CTK45A</p>
+    <div class="social-links">
+      <a class="social-btn" href="#">f</a>
+      <a class="social-btn" href="#">in</a>
+      <a class="social-btn" href="#">tw</a>
+    </div>
+  </div>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast">✅ Đã thêm vào giỏ hàng!</div>
+
+<script>
+  let cartCount = 0;
+  const cartBtn = document.querySelector('.nav-cta');
+  const toast = document.getElementById('toast');
+
+  function addCart(name) {
+    cartCount++;
+    cartBtn.textContent = `🛒 Giỏ Hàng (${cartCount})`;
+    toast.textContent = `✅ Đã thêm "${name}" vào giỏ!`;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2800);
+  }
+
+  function filterBooks(val) {
+    const cards = document.querySelectorAll('#booksGrid .book-card');
+    const q = val.toLowerCase();
+    cards.forEach(c => {
+      const name = c.dataset.name.toLowerCase();
+      c.style.display = name.includes(q) ? '' : 'none';
+    });
+  }
+
+  function subscribe() {
+    const input = document.querySelector('.newsletter-form input');
+    if (input.value.includes('@')) {
+      toast.textContent = '🎉 Đăng ký thành công! Cảm ơn bạn.';
+      toast.classList.add('show');
+      input.value = '';
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    } else {
+      input.style.borderColor = '#e74c3c';
+      setTimeout(() => input.style.borderColor = '', 1500);
+    }
+  }
+
+  // Scroll animation
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.book-card, .cat-card, .review-card').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(28px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
