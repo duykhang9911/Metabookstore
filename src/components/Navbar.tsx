@@ -1,9 +1,11 @@
 'use client'
 import Link from 'next/link'
 import { useCart } from './CartContext'
+import { useWishlist } from './WishlistContext'
 
 export default function Navbar() {
   const { count } = useCart()
+  const { count: wishlistCount } = useWishlist()
 
   return (
     <nav className="sticky top-0 z-50 bg-white/65 backdrop-blur-lg border-b border-violet/15 px-[5%] flex items-center justify-between h-[68px]">
@@ -36,14 +38,31 @@ export default function Navbar() {
         ))}
       </ul>
 
-      <Link
-        href="/cart"
-        className="bg-gradient-to-br from-violet to-indigo text-white text-sm font-semibold
-                   px-5 py-2.5 rounded-full no-underline transition-all duration-200
-                   hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(108,92,231,0.4)]"
-      >
-        🛒 Giỏ Hàng {count > 0 && <span className="ml-1">({count})</span>}
-      </Link>
+      <div className="flex gap-3">
+        <Link
+          href="/wishlist"
+          className="text-[0.93rem] font-medium text-indigo hover:text-violet no-underline
+                     px-3 py-2 rounded-lg transition relative"
+          title="Danh sách yêu thích"
+        >
+          ❤️ {wishlistCount > 0 && <span className="text-xs">{wishlistCount}</span>}
+        </Link>
+        <Link
+          href="/login"
+          className="text-[0.93rem] font-medium text-indigo hover:text-violet no-underline
+                     px-3 py-2 rounded-lg transition"
+        >
+          🔐 Đăng Nhập
+        </Link>
+        <Link
+          href="/cart"
+          className="bg-gradient-to-br from-violet to-indigo text-white text-sm font-semibold
+                     px-5 py-2.5 rounded-full no-underline transition-all duration-200
+                     hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(108,92,231,0.4)]"
+        >
+          🛒 Giỏ Hàng {count > 0 && <span className="ml-1">({count})</span>}
+        </Link>
+      </div>
     </nav>
   )
 }

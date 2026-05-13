@@ -1,39 +1,62 @@
 'use client'
 import { createContext, useContext, useState, ReactNode } from 'react'
-import { Book } from '@/data/books'
 
-type CartItem = Book & { qty: number }
+export interface CartItem {
+  id: string | number
+  title: string
+  price: number
+  quantity: number
+}
 
 type CartCtx = {
-  items: CartItem[]
-  addToCart: (book: Book) => void
-  removeFromCart: (id: number) => void
+  cart: CartItem[]
+  addToCart: (item: CartItem) => void
+  removeFromCart: (id: string | number) => void
+  updateQuantity: (id: string | number, quantity: number) => void
+  clearCart: () => void
   total: number
   count: number
+  items?: any[]
 }
 
 const CartContext = createContext<CartCtx>({} as CartCtx)
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([])
+  const [cart, setCart] = useState<CartItem[]>([])
 
-  const addToCart = (book: Book) => {
-    setItems(prev => {
-      const existing = prev.find(i => i.id === book.id)
-      if (existing) return prev.map(i => i.id === book.id ? { ...i, qty: i.qty + 1 } : i)
-      return [...prev, { ...book, qty: 1 }]
+  const addToCart = (item: CartItem) => {
+    setCart(prev => {
+      const existing = prev.find(i => i.id === item.id)
+      if (existing) {
+        return prev.map(i => 
+          i.id === item.id ? { ...i, quantity: i.quantity + item.quantity } : i
+        )
+      }
+      return [...prev, item]
     })
   }
 
-  const removeFromCart = (id: number) => {
-    setItems(prev => prev.filter(i => i.id !== id))
+  const removeFromCart = (id: string | number) => {
+    setCart(prev => prev.filter(i => i.id !== id))
   }
 
-  const total = items.reduce((s, i) => s + i.price * i.qty, 0)
-  const count = items.reduce((s, i) => s + i.qty, 0)
+  const updateQuantity = (id: string | number, quantity: number) => {
+    if (quantity <= 0) {
+      removeFromCart(id)
+    } else {
+      setCart(prev => prev.map(i => i.id === id ? { ...i, quantity } : i))
+    }
+  }
+
+  const clearCart = () => {
+    setCart([])
+  }
+
+  const total = cart.reduce((s, i) => s + i.price * i.quantity, 0)
+  const count = cart.reduce((s, i) => s + i.quantity, 0)
 
   return (
-    <CartContext.Provider value={{ items, addToCart, removeFromCart, total, count }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart, total, count, items: cart }}>
       {children}
     </CartContext.Provider>
   )

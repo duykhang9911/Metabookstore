@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import Navbar from '@/components/Navbar'
+import Breadcrumb from '@/components/Breadcrumb'
+import ToastContainer from '@/components/ToastContainer'
+import ScrollToTop from '@/components/ScrollToTop'
 import Footer from '@/components/Footer'
 import Providers from '@/components/Providers'
 
@@ -15,7 +18,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <Providers>
           <Navbar />
+          <Breadcrumb />
           <main>{children}</main>
+          <ScrollToTop />
+          <ToastContainer />
           <Footer />
         </Providers>
       </body>

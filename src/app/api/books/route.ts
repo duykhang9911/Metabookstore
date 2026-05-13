@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { verifyToken, extractToken } from '@/lib/jwt';
+import { supabaseServer } from '@/lib/supabase';
+import { verify } from 'jsonwebtoken';
 
 export async function GET(req: NextRequest) {
   try {
@@ -8,20 +8,29 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(req.nextUrl.searchParams.get('limit') || '20');
     const offset = parseInt(req.nextUrl.searchParams.get('offset') || '0');
 
-    const where = category ? { category } : {};
+    const supabase = supabaseServer();
 
-    const books = await prisma.book.findMany({
-      where,
-      take: limit,
-      skip: offset,
-    });
+    let query = supabase.from('books').select('*', { count: 'exact' });
 
-    const total = await prisma.book.count({ where });
+    if (category) {
+      query = query.eq('category', category);
+    }
+
+    const { data: books, count, error } = await query
+      .range(offset, offset + limit - 1)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      return NextResponse.json(
+        { error: 'Failed to fetch books' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       books,
       pagination: {
-        total,
+        total: count || 0,
         limit,
         offset,
       },
@@ -38,14 +47,17 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     // Check authentication
-    const token = extractToken(req.headers.get('authorization'));
-    if (!token) {
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = verifyToken(token);
-    if (!user || user.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+    const token = authHeader.replace('Bearer ', '');
+
+    try {
+      verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    } catch (err) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
     const { title, author, price, description, imageUrl, stock, category } = await req.json();
@@ -57,17 +69,29 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const book = await prisma.book.create({
-      data: {
+    const supabase = supabaseServer();
+
+    const { data: book, error } = await supabase
+      .from('books')
+      .insert([{
         title,
         author,
         price,
         description,
-        imageUrl,
+        image_url: imageUrl,
         stock: stock || 0,
         category,
-      },
-    });
+        created_at: new Date().toISOString(),
+      }])
+      .select('*')
+      .single();
+
+    if (error) {
+      return NextResponse.json(
+        { error: 'Failed to create book' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(book, { status: 201 });
   } catch (error) {

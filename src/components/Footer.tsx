@@ -21,7 +21,12 @@ export default function Footer() {
           },
           {
             title: 'Hỗ Trợ',
-            links: ['Chính Sách Đổi Trả', 'Theo Dõi Đơn Hàng', 'FAQ', 'Liên Hệ'],
+            links: [
+              { name: 'Chính Sách Đổi Trả', href: '#' },
+              { name: 'Theo Dõi Đơn Hàng', href: '#' },
+              { name: 'FAQ', href: '/faq' },
+              { name: 'Liên Hệ', href: '#' },
+            ],
           },
           {
             title: 'Về Chúng Tôi',
@@ -31,13 +36,17 @@ export default function Footer() {
           <div key={col.title}>
             <h4 className="text-[0.8rem] font-bold tracking-widest uppercase text-lavender mb-4">{col.title}</h4>
             <ul className="space-y-2.5">
-              {col.links.map(l => (
-                <li key={l}>
-                  <Link href="#" className="text-[0.87rem] text-white/60 no-underline hover:text-lavender transition-colors">
-                    {l}
-                  </Link>
-                </li>
-              ))}
+              {col.links.map(l => {
+                const href = typeof l === 'string' ? '#' : l.href
+                const name = typeof l === 'string' ? l : l.name
+                return (
+                  <li key={name}>
+                    <Link href={href} className="text-[0.87rem] text-white/60 no-underline hover:text-lavender transition-colors">
+                      {name}
+                    </Link>
+                  </li>
+                )
+              })}
             </ul>
           </div>
         ))}

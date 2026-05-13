@@ -1,42 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { verifyToken, extractToken } from '@/lib/jwt';
+import { supabaseServer } from '@/lib/supabase';
+import { verify } from 'jsonwebtoken';
 
 export async function GET(req: NextRequest) {
   try {
     // Check authentication
-    const token = extractToken(req.headers.get('authorization'));
-    if (!token) {
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = verifyToken(token);
-    if (!user) {
-      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
+    const token = authHeader.replace('Bearer ', '');
+
+    try {
+      verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    } catch (err) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    const cart = await prisma.cart.findUnique({
-      where: { userId: user.id },
-      include: {
-        items: {
-          include: {
-            book: true,
-          },
-        },
-      },
-    });
+    const supabase = supabaseServer();
 
-    if (!cart) {
-      return NextResponse.json({ error: 'Cart not found' }, { status: 404 });
+    const { data: orders, error } = await supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      return NextResponse.json(
+        { error: 'Failed to fetch orders' },
+        { status: 500 }
+      );
     }
 
-    // Calculate total
-    const total = cart.items.reduce((sum, item) => sum + item.book.price * item.quantity, 0);
-
-    return NextResponse.json({
-      cart,
-      total,
-    });
+    return NextResponse.json({ orders });
   } catch (error) {
     console.error('Get cart error:', error);
     return NextResponse.json(
@@ -48,70 +44,65 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    // Check authentication
-    const token = extractToken(req.headers.get('authorization'));
-    if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { items, total, customerInfo } = await req.json();
 
-    const user = verifyToken(token);
-    if (!user) {
-      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
-    }
-
-    const { bookId, quantity = 1 } = await req.json();
-
-    if (!bookId) {
+    if (!items || !customerInfo) {
       return NextResponse.json(
-        { error: 'Book ID is required' },
+        { error: 'Items and customer info are required' },
         { status: 400 }
       );
     }
 
-    // Get or create cart
-    let cart = await prisma.cart.findUnique({
-      where: { userId: user.id },
-    });
+    const supabase = supabaseServer();
 
-    if (!cart) {
-      cart = await prisma.cart.create({
-        data: { userId: user.id },
-      });
+    // Create order
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .insert([{
+        customer_email: customerInfo.email,
+        customer_name: customerInfo.fullName,
+        address: customerInfo.address,
+        city: customerInfo.city,
+        total: total + 5, // Add shipping fee
+        status: 'pending',
+        created_at: new Date().toISOString(),
+      }])
+      .select('*')
+      .single();
+
+    if (orderError) {
+      return NextResponse.json(
+        { error: 'Failed to create order' },
+        { status: 500 }
+      );
     }
 
-    // Check if item already in cart
-    const existingItem = await prisma.cartItem.findUnique({
-      where: {
-        cartId_bookId: {
-          cartId: cart.id,
-          bookId,
-        },
-      },
-    });
+    // Add order items
+    const orderItems = items.map((item: any) => ({
+      order_id: order.id,
+      book_id: item.id,
+      quantity: item.quantity,
+      price: item.price,
+      created_at: new Date().toISOString(),
+    }));
 
-    let cartItem;
-    if (existingItem) {
-      // Update quantity
-      cartItem = await prisma.cartItem.update({
-        where: { id: existingItem.id },
-        data: { quantity: existingItem.quantity + quantity },
-        include: { book: true },
-      });
-    } else {
-      // Create new item
-      cartItem = await prisma.cartItem.create({
-        data: {
-          cartId: cart.id,
-          bookId,
-          quantity,
-        },
-        include: { book: true },
-      });
+    const { error: itemsError } = await supabase
+      .from('order_items')
+      .insert(orderItems);
+
+    if (itemsError) {
+      return NextResponse.json(
+        { error: 'Failed to add order items' },
+        { status: 500 }
+      );
     }
 
-    return NextResponse.json(cartItem, { status: 201 });
+    return NextResponse.json(
+      { message: 'Order created successfully', order },
+      { status: 201 }
+    );
   } catch (error) {
-    console.error('Add to cart error:', error);
+    console.error('Create order error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

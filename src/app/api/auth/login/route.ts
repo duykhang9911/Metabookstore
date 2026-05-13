@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { comparePassword } from '@/lib/password';
-import { generateToken } from '@/lib/jwt';
+import { supabaseServer } from '@/lib/supabase';
+import { compare } from 'bcryptjs';
+import { sign } from 'jsonwebtoken';
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,12 +15,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Find user
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
+    const supabase = supabaseServer();
 
-    if (!user) {
+    // Find user
+    const { data: user, error: fetchError } = await supabase
+      .from('users')
+      .select('id, email, password, full_name')
+      .eq('email', email)
+      .single();
+
+    if (fetchError || !user) {
       return NextResponse.json(
         { error: 'Invalid email or password' },
         { status: 401 }
@@ -28,7 +32,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Compare passwords
-    const isPasswordValid = await comparePassword(password, user.password);
+    const isPasswordValid = await compare(password, user.password);
 
     if (!isPasswordValid) {
       return NextResponse.json(
@@ -38,19 +42,18 @@ export async function POST(req: NextRequest) {
     }
 
     // Generate token
-    const token = generateToken({
-      id: user.id,
-      email: user.email,
-      role: user.role,
-    });
+    const token = sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '7d' }
+    );
 
     return NextResponse.json({
       token,
       user: {
         id: user.id,
         email: user.email,
-        name: user.name,
-        role: user.role,
+        name: user.full_name,
       },
     });
   } catch (error) {

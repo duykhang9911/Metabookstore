@@ -7,6 +7,7 @@ export type Book = {
   rating: number
   gradient: string
   description: string
+  stock: number
 }
 
 export const books: Book[] = [

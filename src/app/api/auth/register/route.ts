@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { hashPassword } from '@/lib/password';
-import { generateToken, TokenPayload } from '@/lib/jwt';
+import { supabaseServer } from '@/lib/supabase';
+import { hash } from 'bcryptjs';
+import { sign } from 'jsonwebtoken';
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,10 +15,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const supabase = supabaseServer();
+
     // Check if user exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', email)
+      .single();
 
     if (existingUser) {
       return NextResponse.json(
@@ -28,26 +32,33 @@ export async function POST(req: NextRequest) {
     }
 
     // Hash password
-    const hashedPassword = await hashPassword(password);
+    const hashedPassword = await hash(password, 10);
 
     // Create user
-    const user = await prisma.user.create({
-      data: {
+    const { data: user, error: createError } = await supabase
+      .from('users')
+      .insert([{
         email,
         password: hashedPassword,
-        name: name || email.split('@')[0],
-        cart: {
-          create: {},
-        },
-      },
-    });
+        full_name: name || email.split('@')[0],
+        created_at: new Date().toISOString(),
+      }])
+      .select('id, email, full_name')
+      .single();
+
+    if (createError) {
+      return NextResponse.json(
+        { error: 'Failed to create user' },
+        { status: 500 }
+      );
+    }
 
     // Generate token
-    const token = generateToken({
-      id: user.id,
-      email: user.email,
-      role: user.role,
-    });
+    const token = sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '7d' }
+    );
 
     return NextResponse.json(
       {
@@ -55,8 +66,7 @@ export async function POST(req: NextRequest) {
         user: {
           id: user.id,
           email: user.email,
-          name: user.name,
-          role: user.role,
+          name: user.full_name,
         },
       },
       { status: 201 }

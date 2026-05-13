@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import BookCard from '@/components/BookCard'
+import RecentlyViewedSection from '@/components/RecentlyViewedSection'
+import Newsletter from '@/components/Newsletter'
 import { books, categories } from '@/data/books'
 
 export default function HomePage() {
@@ -122,6 +124,36 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── RECENTLY VIEWED ── */}
+      <RecentlyViewedSection />
+
+      {/* ── WHY CHOOSE US ── */}
+      <section className="max-w-6xl mx-auto px-[5%] py-20 bg-gradient-to-br from-violet/5 to-sky/5 rounded-3xl mb-20">
+        <div className="text-center mb-12">
+          <span className="section-tag">✨ Lý Do Chọn</span>
+          <h2 className="font-display text-4xl text-navy mb-3">Tại Sao Chọn MetaBookstore?</h2>
+          <p className="text-indigo/70 max-w-lg mx-auto">Những lợi ích độc quyền chỉ có tại MetaBookstore</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            { icon: '🚀', title: 'Giao Nhanh', desc: 'Giao hàng trong 24-48 giờ cho thành phố lớn' },
+            { icon: '💯', title: 'Chính Hãng', desc: '100% sách chính hãng từ nhà xuất bản' },
+            { icon: '💰', title: 'Giá Tốt', desc: 'Giá cạnh tranh, thường xuyên có khuyến mãi' },
+            { icon: '🔄', title: 'Đổi Trả', desc: 'Chính sách đổi trả 30 ngày không lý do' },
+            { icon: '🎁', title: 'Quà Tặng', desc: 'Nhận quà tặng khi mua từ 300,000 ₫' },
+            { icon: '⭐', title: 'Đánh Giá Cao', desc: 'Rating 4.9/5.0 từ hơn 120,000 khách hàng' },
+            { icon: '👥', title: 'Cộng Đồng', desc: 'Cộng đồng độc giả sôi động, chia sẻ review' },
+            { icon: '📲', title: 'Ứng Dụng', desc: 'App di động tiện lợi, mua sách mọi lúc' },
+          ].map((item, i) => (
+            <div key={i} className="card p-6 text-center hover:scale-105 transition-transform">
+              <div className="text-4xl mb-3">{item.icon}</div>
+              <h3 className="font-semibold text-navy mb-2">{item.title}</h3>
+              <p className="text-indigo/70 text-sm">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ── REVIEWS ── */}
       <section className="max-w-6xl mx-auto px-[5%] pb-20">
         <div className="text-center mb-12">
@@ -152,19 +184,7 @@ export default function HomePage() {
       </section>
 
       {/* ── NEWSLETTER ── */}
-      <section className="border-y border-lavender/20 bg-gradient-to-r from-violet/5 to-sky/5 py-16 text-center px-[5%]">
-        <h2 className="font-display text-3xl text-navy mb-2">Đăng Ký Nhận Ưu Đãi</h2>
-        <p className="text-indigo/70 mb-7">Nhận thông báo về sách mới và khuyến mãi hấp dẫn mỗi tuần</p>
-        <div className="flex gap-3 max-w-md mx-auto">
-          <input
-            type="email"
-            placeholder="Email của bạn..."
-            className="flex-1 px-5 py-3.5 rounded-full border-[1.5px] border-violet/20 bg-white
-                       text-navy text-sm outline-none focus:border-violet transition-colors"
-          />
-          <button className="btn-primary whitespace-nowrap">Đăng Ký</button>
-        </div>
-      </section>
+      <Newsletter />
     </>
   )
 }
